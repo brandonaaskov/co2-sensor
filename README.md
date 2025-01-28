@@ -1,19 +1,65 @@
 # CO2 Sensor
 
-_Note: Prompted Claude this time (and going forward until the working prototype) as it was the most succinct and successful as compared to Perplexity and ChatGPT. I didn't give DeepSeek R1 a fair shot because it's running on my Windows machine in a Docker container at the moment and isn't as usable as it needs to be._
+## Fifth AI Attempt (Claude only)
 
-## Fourth AI Attempt
+I would like to expand this code to read values from a CO2 sensor and display that value instead of the hardcoded “1500 ppm” that’s currently in there:
 
-I have a microcontroller from Adafruit, and I want to display some stuff on this OLED screen.
+Here’s the current code:
 
-**Microcontroller**
+```python
+import board
+import terminalio
+import time
+from adafruit_display_text import bitmap_label
+import displayio
 
-- Product page: https://www.adafruit.com/product/5691
-- Learning guide: https://learn.adafruit.com/esp32-s3-reverse-tft-feather?view=all
-- Another guide: https://learn.adafruit.com/esp32-s2-tft-digital-clock-display-featuring-blanka-chan?view=all
-- Another guide: https://learn.adafruit.com/circuitpython-day-2024-countdown-clock?view=all
-- Another guide: https://learn.adafruit.com/circuitpython-elgato-wifi-light-controller?view=all
+display = board.DISPLAY
 
-In the bottom right of the screen I would like to display the current time as (HH:MM:SS) using military time. It should update every second. That font size can be small. I would also like to display the text “1500 ppm” in large bold text in the middle of the screen. I would also like that text to be red.
+# Create the main display group
+main_group = displayio.Group()
 
-I already have CircuitPython installed on the microcontroller. I just need the code to get it operational. Can you help with that?
+# Create the PPM text (large and centered)
+ppm_text = bitmap_label.Label(
+    terminalio.FONT,
+    text="1500 ppm",
+    scale=3,  # Makes it larger
+    color=0xFF0000,  # Red color in hex
+)
+# Center the PPM text
+ppm_text.anchor_point = (0.5, 0.5)
+ppm_text.anchored_position = (display.width // 2, display.height // 2)
+
+# Create the clock text (smaller, bottom right)
+clock_text = bitmap_label.Label(terminalio.FONT, text="00:00:00", scale=1)
+# Position clock in bottom right
+clock_text.x = display.width - 70  # Adjust this value if needed
+clock_text.y = display.height - 10  # Adjust this value if needed
+
+# Add both text elements to the main group
+main_group.append(ppm_text)
+main_group.append(clock_text)
+
+# Show it on the display
+display.root_group = main_group
+
+# Main loop
+while True:
+    # Update the time
+    current_time = time.localtime()
+    time_str = "{:02d}:{:02d}:{:02d}".format(
+        current_time.tm_hour, current_time.tm_min, current_time.tm_sec
+    )
+    clock_text.text = time_str
+
+    # Small delay to prevent too frequent updates
+    time.sleep(1)
+```
+
+Here is the CO2 sensor that I have:
+
+- Product page: https://www.adafruit.com/product/5187
+- Learning guide: https://learn.adafruit.com/adafruit-scd-40-and-scd-41?view=all
+- Another guide: https://learn.adafruit.com/diy-trinkey-no-solder-air-quality-monitor?view=all
+- Another guide: https://learn.adafruit.com/disconnected-co2-data-logger?view=all
+
+Can you help me update my code to read values from this sensor and display that instead?
