@@ -1,65 +1,7 @@
 # CO2 Sensor
 
-## Fifth AI Attempt (Claude only)
+## Prompt to add a computer fan
 
-I would like to expand this code to read values from a CO2 sensor and display that value instead of the hardcoded “1500 ppm” that’s currently in there:
+*Note: not re-copying the code since it’s in the context history*
 
-Here’s the current code:
-
-```python
-import board
-import terminalio
-import time
-from adafruit_display_text import bitmap_label
-import displayio
-
-display = board.DISPLAY
-
-# Create the main display group
-main_group = displayio.Group()
-
-# Create the PPM text (large and centered)
-ppm_text = bitmap_label.Label(
-    terminalio.FONT,
-    text="1500 ppm",
-    scale=3,  # Makes it larger
-    color=0xFF0000,  # Red color in hex
-)
-# Center the PPM text
-ppm_text.anchor_point = (0.5, 0.5)
-ppm_text.anchored_position = (display.width // 2, display.height // 2)
-
-# Create the clock text (smaller, bottom right)
-clock_text = bitmap_label.Label(terminalio.FONT, text="00:00:00", scale=1)
-# Position clock in bottom right
-clock_text.x = display.width - 70  # Adjust this value if needed
-clock_text.y = display.height - 10  # Adjust this value if needed
-
-# Add both text elements to the main group
-main_group.append(ppm_text)
-main_group.append(clock_text)
-
-# Show it on the display
-display.root_group = main_group
-
-# Main loop
-while True:
-    # Update the time
-    current_time = time.localtime()
-    time_str = "{:02d}:{:02d}:{:02d}".format(
-        current_time.tm_hour, current_time.tm_min, current_time.tm_sec
-    )
-    clock_text.text = time_str
-
-    # Small delay to prevent too frequent updates
-    time.sleep(1)
-```
-
-Here is the CO2 sensor that I have:
-
-- Product page: https://www.adafruit.com/product/5187
-- Learning guide: https://learn.adafruit.com/adafruit-scd-40-and-scd-41?view=all
-- Another guide: https://learn.adafruit.com/diy-trinkey-no-solder-air-quality-monitor?view=all
-- Another guide: https://learn.adafruit.com/disconnected-co2-data-logger?view=all
-
-Can you help me update my code to read values from this sensor and display that instead?
+I have a computer fan that simply has a ground and a 5V wire. It can take 5V, and draws 900ma. I have an N-Channel MOSFET if it’s required. I also have transistors if that’s required. But if I can wire it directly to a GPIO pin, that’s great too. I would like to have the fan turn on when the ppm value is above 850 ppm, and turn off when it reaches below 750 ppm. Can you help me modify the code to support this? Please also let me know how I should wire up the fan: I have a breadboard and just about everything I could need to accomplish that task.

@@ -4,12 +4,17 @@ import time
 from adafruit_display_text import bitmap_label
 import displayio
 import adafruit_scd4x
-# import busio
+import digitalio  # Add this for GPIO control
 
 # Initialize I2C
-i2c = board.I2C()  # uses board.SCL and board.SDA
+i2c = board.I2C()
 scd4x = adafruit_scd4x.SCD4X(i2c)
-scd4x.start_periodic_measurement()  # Start taking measurements
+scd4x.start_periodic_measurement()
+
+# Initialize fan control GPIO
+fan_pin = digitalio.DigitalInOut(board.D9)  # Use GPIO pin 9
+fan_pin.direction = digitalio.Direction.OUTPUT
+fan_pin.value = False  # Start with fan off
 
 display = board.DISPLAY
 
@@ -17,30 +22,32 @@ display = board.DISPLAY
 main_group = displayio.Group()
 
 # Create the PPM text (large and centered)
-ppm_text = bitmap_label.Label(
-    terminalio.FONT,
-    text="Wait...",  # Initial text while sensor warms up
-    scale=3,  # Makes it larger
-    color=0xFF0000,  # Red color in hex
-)
-# Center the PPM text
+ppm_text = bitmap_label.Label(terminalio.FONT, text="Wait...", scale=3, color=0xFF0000)
 ppm_text.anchor_point = (0.5, 0.5)
 ppm_text.anchored_position = (display.width // 2, display.height // 2)
 
 # Create the clock text (smaller, bottom right)
 clock_text = bitmap_label.Label(terminalio.FONT, text="00:00:00", scale=1)
-# Position clock in bottom right
 clock_text.x = display.width - 70
 clock_text.y = display.height - 10
 
-# Add both text elements to the main group
+# Create fan status text (smaller, top right)
+fan_text = bitmap_label.Label(terminalio.FONT, text="Fan: OFF", scale=1)
+fan_text.x = display.width - 70
+fan_text.y = 20
+
+# Add all elements to the main group
 main_group.append(ppm_text)
 main_group.append(clock_text)
+main_group.append(fan_text)
 
 # Show it on the display
 display.root_group = main_group
 
-# Main loop
+# Variables for fan control with hysteresis
+FAN_ON_THRESHOLD = 850
+FAN_OFF_THRESHOLD = 750
+
 while True:
     # Update the time
     current_time = time.localtime()
@@ -54,7 +61,15 @@ while True:
         co2 = scd4x.CO2
         ppm_text.text = f"{co2} ppm"
 
-        # Optionally change color based on CO2 levels
+        # Fan control logic with hysteresis
+        if co2 > FAN_ON_THRESHOLD and not fan_pin.value:
+            fan_pin.value = True
+            fan_text.text = "Fan: ON"
+        elif co2 < FAN_OFF_THRESHOLD and fan_pin.value:
+            fan_pin.value = False
+            fan_text.text = "Fan: OFF"
+
+        # Color coding based on CO2 levels
         if co2 < 1000:
             ppm_text.color = 0x00FF00  # Green
         elif co2 < 2000:
@@ -62,5 +77,4 @@ while True:
         else:
             ppm_text.color = 0xFF0000  # Red
 
-    # Small delay to prevent too frequent updates
     time.sleep(1)
