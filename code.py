@@ -14,6 +14,7 @@ scd4x.start_periodic_measurement()
 # Initialize fan control GPIO
 fan_pin = digitalio.DigitalInOut(board.D9)
 fan_pin.direction = digitalio.Direction.OUTPUT
+fan_pin.drive_mode = digitalio.DriveMode.PUSH_PULL
 fan_pin.value = False  # Start with fan off (normal logic)
 
 display = board.DISPLAY
@@ -45,10 +46,10 @@ main_group.append(fan_text)
 display.root_group = main_group
 
 # Variables for fan control with hysteresis
-FAN_ON_THRESHOLD = 850
-FAN_OFF_THRESHOLD = 750
+FAN_ON_THRESHOLD = 1100
 
 while True:
+    print(fan_pin.value)
     # Update the time
     current_time = time.localtime()
     time_str = "{:02d}:{:02d}:{:02d}".format(
@@ -62,17 +63,17 @@ while True:
         ppm_text.text = f"{co2} ppm"
 
         # Fan control logic with hysteresis (normal logic)
-        if co2 > FAN_ON_THRESHOLD and not fan_pin.value:  # Check if fan is off
+        if co2 > FAN_ON_THRESHOLD:  # Check if fan is off
             fan_pin.value = True  # Turn fan on
             fan_text.text = "Fan: ON"
-        elif co2 < FAN_OFF_THRESHOLD and fan_pin.value:  # Check if fan is on
+        else:  # Check if fan is on
             fan_pin.value = False  # Turn fan off
             fan_text.text = "Fan: OFF"
 
         # Color coding based on CO2 levels
-        if co2 < 1000:
+        if co2 < FAN_ON_THRESHOLD:
             ppm_text.color = 0x00FF00  # Green
-        elif co2 < 2000:
+        elif co2 < 1500:
             ppm_text.color = 0xFFFF00  # Yellow
         else:
             ppm_text.color = 0xFF0000  # Red
