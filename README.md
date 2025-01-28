@@ -1,6 +1,9 @@
 # CO2 Sensor
 
-## Second AI Prompt
+_Note: Prompted Claude this time (and going forward until the working prototype) as it was the most succinct and successful as compared to Perplexity and ChatGPT. I didn't give DeepSeek R1 a fair shot because it's running on my Windows machine in a Docker container at the moment and isn't as usable as it needs to be._
+
+## Fourth AI Attempt
+
 I have a microcontroller from Adafruit, and I want to display some stuff on this OLED screen.
 
 **Microcontroller**
