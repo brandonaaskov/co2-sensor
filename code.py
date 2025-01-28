@@ -4,7 +4,7 @@ import time
 from adafruit_display_text import bitmap_label
 import displayio
 import adafruit_scd4x
-import digitalio  # Add this for GPIO control
+import digitalio
 
 # Initialize I2C
 i2c = board.I2C()
@@ -12,9 +12,9 @@ scd4x = adafruit_scd4x.SCD4X(i2c)
 scd4x.start_periodic_measurement()
 
 # Initialize fan control GPIO
-fan_pin = digitalio.DigitalInOut(board.D9)  # Use GPIO pin 9
+fan_pin = digitalio.DigitalInOut(board.D9)
 fan_pin.direction = digitalio.Direction.OUTPUT
-fan_pin.value = False  # Start with fan off
+fan_pin.value = False  # Start with fan off (normal logic)
 
 display = board.DISPLAY
 
@@ -61,12 +61,12 @@ while True:
         co2 = scd4x.CO2
         ppm_text.text = f"{co2} ppm"
 
-        # Fan control logic with hysteresis
-        if co2 > FAN_ON_THRESHOLD and not fan_pin.value:
-            fan_pin.value = True
+        # Fan control logic with hysteresis (normal logic)
+        if co2 > FAN_ON_THRESHOLD and not fan_pin.value:  # Check if fan is off
+            fan_pin.value = True  # Turn fan on
             fan_text.text = "Fan: ON"
-        elif co2 < FAN_OFF_THRESHOLD and fan_pin.value:
-            fan_pin.value = False
+        elif co2 < FAN_OFF_THRESHOLD and fan_pin.value:  # Check if fan is on
+            fan_pin.value = False  # Turn fan off
             fan_text.text = "Fan: OFF"
 
         # Color coding based on CO2 levels
